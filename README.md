@@ -1,4 +1,4 @@
-# Ollama Weather Agent
+# Morning Planner Agent
 
 This project creates an AI agent that uses a local Ollama model with added functionality to fetch weather data. The agent can respond to general queries and has special handling for weather-related questions.
 
@@ -170,6 +170,3 @@ The agent is designed to be easily extensible with new tools. To add a new tool:
 ## License
 
 UNLICENSED
-
-// Made with Bob
-# morning-planner-agent

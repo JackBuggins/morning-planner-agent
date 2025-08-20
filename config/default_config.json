@@ -1,0 +1,21 @@
+{
+  "api": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": true
+  },
+  "ollama": {
+    "base_url": "http://localhost:11434",
+    "default_model": "llama3",
+    "timeout": 60
+  },
+  "weather": {
+    "api_url": "https://api.openweathermap.org/data/2.5/weather",
+    "units": "metric",
+    "cache_duration": 1800
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}
