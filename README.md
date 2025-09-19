@@ -19,17 +19,17 @@ This project creates an AI agent that uses a local Ollama model with added funct
 
 ## Python Environment Setup
 
-This project uses Python 3.8.0 and includes a `.python-version` file for use with pyenv.
+This project uses Python 3.8.13 and includes a `.python-version` file for use with pyenv.
 
 For pyenv installation and setup instructions, please refer to the official documentation:
 https://github.com/pyenv/pyenv#installation
 
-After installing pyenv, you can install Python 3.8.0 with:
+After installing pyenv, you can install Python 3.8.13 with:
 ```
-pyenv install 3.8.0
+pyenv install 3.8.13
 ```
 
-Then navigate to the project directory, and pyenv will automatically use Python 3.8.0.
+Then navigate to the project directory, and pyenv will automatically use Python 3.8.13.
 
 ## Installation
 
