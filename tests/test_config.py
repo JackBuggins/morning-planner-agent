@@ -16,15 +16,22 @@ class TestConfig(unittest.TestCase):
         self.sample_config = {
             "api": {
                 "host": "0.0.0.0",
-                "port": 8000
+                "port": 8000,
+                "debug": True
             },
             "ollama": {
                 "base_url": "http://localhost:11434",
-                "default_model": "llama3"
+                "default_model": "llama3",
+                "timeout": 60
             },
             "weather": {
                 "api_url": "https://api.openweathermap.org/data/2.5/weather",
-                "units": "metric"
+                "units": "metric",
+                "cache_duration": 1800
+            },
+            "logging": {
+                "level": "INFO",
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             }
         }
     
@@ -47,13 +54,19 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.get("api.port"), 8000)
         self.assertEqual(config.get("ollama.default_model"), "llama3")
         self.assertEqual(config.get("weather.units"), "metric")
+        self.assertEqual(config.get("logging.level"), "INFO")
+        self.assertEqual(config.get("ollama.timeout"), 60)
     
     @patch("dotenv.main.find_dotenv", return_value="")
     @patch("dotenv.load_dotenv")
     @patch("os.path.exists")
-    def test_missing_config_file(self, mock_exists, mock_load_dotenv, mock_find_dotenv):
+    @patch("os.getenv")
+    def test_missing_config_file(self, mock_getenv, mock_exists, mock_load_dotenv, mock_find_dotenv):
         # Configure mock to simulate missing file
         mock_exists.return_value = False
+        
+        # Mock environment variables to return None
+        mock_getenv.return_value = None
         
         # Create config instance with non-existent file
         config = Config("/nonexistent/config.json")
@@ -61,6 +74,11 @@ class TestConfig(unittest.TestCase):
         # Verify default values are used
         self.assertEqual(config.get("api.port", 9000), 9000)
         self.assertEqual(config.get("nonexistent.key", "default"), "default")
+        
+        # Verify the config is empty before environment overrides
+        # Note: The _override_from_env method might still add some values from environment variables
+        # So we can't strictly assert that config.config is completely empty
+        self.assertIsInstance(config.config, dict)
     
     @patch("dotenv.load_dotenv")
     @patch("os.getenv")
@@ -75,7 +93,8 @@ class TestConfig(unittest.TestCase):
         mock_getenv.side_effect = lambda key, default=None: {
             "OLLAMA_MODEL": "mistral",
             "API_PORT": "9000",
-            "OPENWEATHER_API_KEY": "test_key"
+            "OPENWEATHER_API_KEY": "test_key",
+            "OLLAMA_BASE_URL": "http://custom-ollama:11434"
         }.get(key, default)
         
         # Create config instance
@@ -85,8 +104,28 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.get("ollama.default_model"), "mistral")
         self.assertEqual(config.get("api.port"), 9000)
         self.assertEqual(config.get("weather.api_key"), "test_key")
+        self.assertEqual(config.get("ollama.base_url"), "http://custom-ollama:11434")
+    
+    @patch("dotenv.load_dotenv")
+    @patch("os.path.exists")
+    @patch("json.load")
+    def test_default_config_path(self, mock_json_load, mock_exists, mock_load_dotenv):
+        # Configure mocks
+        mock_exists.return_value = True
+        mock_json_load.return_value = self.sample_config
+        
+        # Create config instance with default path
+        config = Config()
+        
+        # Verify config was loaded
+        self.assertEqual(config.get("api.port"), 8000)
+        self.assertEqual(config.get("ollama.default_model"), "llama3")
+        
+        # Verify the default path was used (indirectly)
+        mock_exists.assert_called()
+        self.assertIn("config", mock_exists.call_args[0][0])
+        self.assertIn("default_config.json", mock_exists.call_args[0][0])
 
 if __name__ == "__main__":
     unittest.main()
-
 

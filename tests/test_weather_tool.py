@@ -54,10 +54,17 @@ class TestWeatherTool(unittest.TestCase):
         self.assertIn("15.5°C", result)
         self.assertIn("76%", result)
         self.assertIn("4.1 m/s", result)
+        
+        # Verify the API was called with the correct parameters
+        mock_get.assert_called_once()
+        args, kwargs = mock_get.call_args
+        self.assertEqual(kwargs['params']['q'], "London")
+        self.assertEqual(kwargs['params']['units'], "metric")
+        self.assertEqual(kwargs['params']['appid'], "test_api_key")
     
     @patch('src.tools.weather_tool.requests.get')
     def test_get_weather_api_error(self, mock_get):
-        # Configure the mock to raise a RequestException instead of a generic Exception
+        # Configure the mock to raise a RequestException
         mock_get.side_effect = requests.exceptions.RequestException("API Error")
         
         # Call the method under test
@@ -77,7 +84,40 @@ class TestWeatherTool(unittest.TestCase):
             result = tool_without_key.get_weather("London")
             
             # Verify the result contains error information
-            self.assertIn("API key not configured", result)
+            self.assertIn("Error: OpenWeather API key not configured", result)
+    
+    def test_format_weather_data(self):
+        """Test the _format_weather_data method directly."""
+        # Call the method under test
+        result = self.weather_tool._format_weather_data(self.sample_weather_data)
+        
+        # Verify the formatted string contains all expected elements
+        self.assertIn("London, GB", result)
+        self.assertIn("light rain", result)
+        self.assertIn("15.5°C", result)
+        self.assertIn("feels like 14.8°C", result)
+        self.assertIn("76%", result)
+        self.assertIn("4.1 m/s", result)
+    
+    def test_format_weather_data_missing_keys(self):
+        """Test the _format_weather_data method with missing data."""
+        # Create incomplete weather data
+        incomplete_data = {
+            "name": "London",
+            "sys": {},  # Missing country
+            "main": {
+                "temp": 15.5
+                # Missing feels_like and humidity
+            },
+            "weather": [{"description": "light rain"}]
+            # Missing wind
+        }
+        
+        # Call the method under test
+        result = self.weather_tool._format_weather_data(incomplete_data)
+        
+        # Verify the result contains error information
+        self.assertIn("Error parsing weather data", result)
 
 if __name__ == '__main__':
     unittest.main()
