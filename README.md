@@ -29,14 +29,20 @@ After installing pyenv, you can install Python 3.8.13 with:
 pyenv install 3.8.13
 ```
 
-Then navigate to the project directory, and pyenv will automatically use Python 3.8.13.
+Then navigate to the project directory, and run the following command
+
+```
+pyenv init 3.8.13
+```
+
+You should execute any follow up commands it recommends as desired
 
 ## Installation
 
 1. Clone this repository:
    ```
    git clone <your-repo-url>
-   cd ollama-weather-agent
+   cd morning-planner-agent
    ```
 
 2. Run the setup script to install dependencies and create configuration files:
